@@ -1,0 +1,32 @@
+version: '3.8'
+
+networks:
+  intigriti-network:
+    driver: bridge
+    name: intigriti-network
+
+volumes:
+  postgres-data:
+
+services:
+
+  postgres:
+    container_name: postgres
+    image: postgres:13
+    environment:
+      POSTGRES_USER: psuser
+      POSTGRES_PASSWORD: pspassord
+      PGDATA: /data/postgres
+      POSTGRES_DB: psdtabase
+    volumes:
+      - postgres-data:/data/postgres
+    ports:
+      - 5332:5432
+    networks:
+      - intigriti-network
+    restart: unless-stopped
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -d postgres" ]
+      interval: 30s
+      timeout: 10s
+      retries: 5
