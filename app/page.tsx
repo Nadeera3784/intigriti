@@ -1,9 +1,11 @@
-import { Button } from "@/components/ui/button";
+"use client"
+
+import ProgramPage from "@/pages/program"
 
 export default function Home() {
   return (
     <>
-      <Button>Theme</Button>
+     <ProgramPage/>
     </>
-  );
+  )
 }

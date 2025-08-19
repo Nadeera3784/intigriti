@@ -7,9 +7,16 @@ import {
   ChevronRightIcon,
 } from "lucide-react"
 import { DayButton, DayPicker, getDefaultClassNames } from "react-day-picker"
-
 import { cn } from "@/lib/utils"
 import { Button, buttonVariants } from "@/components/ui/button"
+
+interface CalendarProps extends Omit<React.ComponentProps<typeof DayPicker>, 'footer'> {
+  buttonVariant?: React.ComponentProps<typeof Button>["variant"]
+  onCancel?: () => void
+  onConfirm?: () => void
+  onSelect?: (date: Date | undefined) => void,
+  selected?: Date | undefined
+}
 
 function Calendar({
   className,
@@ -19,11 +26,13 @@ function Calendar({
   buttonVariant = "ghost",
   formatters,
   components,
+  onCancel,
+  onConfirm,
   ...props
-}: React.ComponentProps<typeof DayPicker> & {
-  buttonVariant?: React.ComponentProps<typeof Button>["variant"]
-}) {
+}: CalendarProps) {
   const defaultClassNames = getDefaultClassNames()
+
+  const { footer: _, ...dayPickerProps } = props as any; //eslint-disable-line
 
   return (
     <DayPicker
@@ -167,7 +176,23 @@ function Calendar({
         },
         ...components,
       }}
-      {...props}
+      footer={
+        (onCancel || onConfirm) ? (
+          <div className="flex justify-between gap-2 mt-4">
+            {onCancel && (
+              <Button className="w-1/2 cursor-pointer text-primary bg-primary/10" variant="secondary" onClick={onCancel}>
+                Cancel
+              </Button>
+            )}
+            {onConfirm && (
+              <Button className="w-1/2 cursor-pointer" onClick={onConfirm}>
+                Select
+              </Button>
+            )}
+          </div>
+        ) : undefined
+      }
+      {...dayPickerProps}
     />
   )
 }
