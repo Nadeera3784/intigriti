@@ -22,5 +22,4 @@ const customJestConfig = {
   testTimeout: 10000,
 };
 
-
 module.exports = createJestConfig(customJestConfig);

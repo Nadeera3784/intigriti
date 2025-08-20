@@ -5,7 +5,4 @@ beforeAll(() => {
     "postgresql://psuser:pspassord@localhost:5332/test_psdtabase";
 });
 
-
-afterAll(() => {
-
-});
+afterAll(() => {});

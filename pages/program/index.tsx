@@ -10,47 +10,35 @@ import {
 } from "@/components/ui/dialog";
 import { ConfirmationDialog } from "@/components/ui/confirmation-dialog";
 import { ProgramForm } from "@/components/program/program-form";
-import { ProgramList } from "@/components/program/program-list";
 import { fetchPrograms, createProgram, deleteProgram } from "@/lib/intercom";
 import Statistics from "@/components/program/statistics";
 import { CustomPagination } from "@/components/shared/custom-pagination";
 import { CreateProgramFormDataType } from "@/types";
 import { ApiProgram, CreateProgramRequest, Program } from "@/interfaces";
+import {
+  Action,
+  Column,
+  DataTable,
+  defaultRenderers,
+} from "@/components/shared/data-table";
+import { TrashIcon } from "lucide-react";
 
 const MemoizedStatistics = memo(Statistics);
-
-const PageHeader = memo(() => (
-  <div className="flex justify-between items-center mb-8">
-    <div>
-      <h1 className="text-3xl font-bold">Programs</h1>
-    </div>
-  </div>
-));
-
-PageHeader.displayName = "PageHeader";
-
-const SubscriptionSection = memo(() => (
-  <div className="mb-6">
-    <h3 className="text-xl font-bold">Subscription Details</h3>
-  </div>
-));
-
-SubscriptionSection.displayName = "SubscriptionSection";
-
-const ProgramsPagination = memo(CustomPagination);
 
 export default function ProgramPage() {
   const [programs, setPrograms] = useState<Program[]>([]);
   const [showDialog, setShowDialog] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [currentSort, setCurrentSort] = useState<{
-    field: string;
+
+  const [sortConfig, setSortConfig] = useState<{
+    field: keyof Program;
     order: "asc" | "desc";
   }>({
     field: "createdAt",
     order: "desc",
   });
+
   const [pagination, setPagination] = useState({
     page: 1,
     limit: 10,
@@ -59,6 +47,7 @@ export default function ProgramPage() {
     hasNextPage: false,
     hasPreviousPage: false,
   });
+
   const [deleteConfirmation, setDeleteConfirmation] = useState<{
     isOpen: boolean;
     programId: string | null;
@@ -84,9 +73,56 @@ export default function ProgramPage() {
     createdAt: new Date(apiProgram.createdAt),
   });
 
+  const columns: Column<Program>[] = [
+    {
+      key: "name",
+      label: "Program",
+      sortable: true,
+      className: "font-medium text-primary",
+      render: (value) => defaultRenderers.truncate(value, 20),
+    },
+    {
+      key: "startDate",
+      label: "Start Date",
+      sortable: true,
+      render: (value) => defaultRenderers.date(value),
+    },
+    {
+      key: "identifier",
+      label: "Asset Identifier",
+      className: "font-mono text-sm",
+    },
+    {
+      key: "description",
+      label: "Description",
+      render: (value) => defaultRenderers.tooltip(value || "", 15),
+    },
+    {
+      key: "eligibility",
+      label: "Bounty Eligibility",
+      sortable: true,
+      render: (value) =>
+        defaultRenderers.badge(value, {
+          variant: {
+            eligible: "bg-green-100 text-green-700",
+            ineligible: "bg-red-100 text-red-700",
+          },
+        }),
+    },
+  ];
+
+  const actions: Action<Program>[] = [
+    {
+      label: "Delete",
+      icon: <TrashIcon className="h-4 w-4" />,
+      onClick: (program) => handleDeleteRequest(program.id),
+      variant: "destructive",
+    },
+  ];
+
   const loadPrograms = useCallback(
     async (
-      sortBy?: string,
+      sortBy?: keyof Program,
       sortOrder?: "asc" | "desc",
       page?: number,
       limit?: number,
@@ -94,7 +130,12 @@ export default function ProgramPage() {
       try {
         setLoading(true);
         setError(null);
-        const response = await fetchPrograms(sortBy, sortOrder, page, limit);
+        const response = await fetchPrograms(
+          sortBy ? String(sortBy) : undefined,
+          sortOrder,
+          page,
+          limit,
+        );
         const convertedPrograms = response.programs.map(convertApiProgram);
         setPrograms(convertedPrograms);
         setPagination(response.pagination);
@@ -109,10 +150,10 @@ export default function ProgramPage() {
   );
 
   const handleSort = useCallback(
-    async (sortBy: string, sortOrder: "asc" | "desc") => {
-      setCurrentSort({ field: sortBy, order: sortOrder });
+    async (field: keyof Program, order: "asc" | "desc") => {
+      setSortConfig({ field, order });
       setPagination((prev) => ({ ...prev, page: 1 }));
-      await loadPrograms(sortBy, sortOrder, 1, pagination.limit);
+      await loadPrograms(field, order, 1, pagination.limit);
     },
     [loadPrograms, pagination.limit],
   );
@@ -121,26 +162,26 @@ export default function ProgramPage() {
     async (newPage: number) => {
       setPagination((prev) => ({ ...prev, page: newPage }));
       await loadPrograms(
-        currentSort.field,
-        currentSort.order,
+        sortConfig.field,
+        sortConfig.order,
         newPage,
         pagination.limit,
       );
     },
-    [loadPrograms, currentSort, pagination.limit],
+    [loadPrograms, sortConfig, pagination.limit],
   );
 
   useEffect(() => {
     loadPrograms(
-      currentSort.field,
-      currentSort.order,
+      sortConfig.field,
+      sortConfig.order,
       pagination.page,
       pagination.limit,
     );
   }, [
     loadPrograms,
-    currentSort.field,
-    currentSort.order,
+    sortConfig.field,
+    sortConfig.order,
     pagination.page,
     pagination.limit,
   ]);
@@ -162,8 +203,8 @@ export default function ProgramPage() {
         await createProgram(programData);
         setShowDialog(false);
         await loadPrograms(
-          currentSort.field,
-          currentSort.order,
+          sortConfig.field,
+          sortConfig.order,
           pagination.page,
           pagination.limit,
         );
@@ -172,7 +213,7 @@ export default function ProgramPage() {
         alert("Failed to create program. Please try again.");
       }
     },
-    [loadPrograms, currentSort, pagination],
+    [loadPrograms, sortConfig, pagination],
   );
 
   const handleCancel = useCallback(() => {
@@ -201,8 +242,8 @@ export default function ProgramPage() {
       setDeleteConfirmation((prev) => ({ ...prev, isDeleting: true }));
       await deleteProgram(deleteConfirmation.programId);
       await loadPrograms(
-        currentSort.field,
-        currentSort.order,
+        sortConfig.field,
+        sortConfig.order,
         pagination.page,
         pagination.limit,
       );
@@ -217,7 +258,7 @@ export default function ProgramPage() {
       alert("Failed to delete program. Please try again.");
       setDeleteConfirmation((prev) => ({ ...prev, isDeleting: false }));
     }
-  }, [deleteConfirmation.programId, loadPrograms, currentSort, pagination]);
+  }, [deleteConfirmation.programId, loadPrograms, sortConfig, pagination]);
 
   const handleDeleteCancel = useCallback(() => {
     setDeleteConfirmation({
@@ -246,8 +287,8 @@ export default function ProgramPage() {
           <Button
             onClick={() =>
               loadPrograms(
-                currentSort.field,
-                currentSort.order,
+                sortConfig.field,
+                sortConfig.order,
                 pagination.page,
                 pagination.limit,
               )
@@ -263,23 +304,35 @@ export default function ProgramPage() {
   return (
     <div className="min-h-screen bg-gray-200">
       <div className="container mx-auto py-8">
-        <PageHeader />
-        <SubscriptionSection />
-
+        <div className="flex justify-between items-center mb-8">
+          <div>
+            <h1 className="text-3xl font-bold">Programs</h1>
+          </div>
+        </div>
+        <div className="mb-6">
+          <h3 className="text-xl font-bold">Subscription Details</h3>
+        </div>
         <div className="mb-6">
           <MemoizedStatistics setShowDialog={setShowDialog} />
         </div>
-        <ProgramList
-          programs={programs}
-          onDelete={handleDeleteRequest}
+
+        <DataTable
+          data={programs}
+          columns={columns}
+          actions={actions}
           onSort={handleSort}
-          currentSort={currentSort}
+          currentSort={sortConfig}
+          title="All Programs"
+          emptyMessage="No programs found."
+          getRowKey={(program) => program.id}
           pagination={pagination}
         />
-        <ProgramsPagination
+
+        <CustomPagination
           pagination={pagination}
           onPageChange={handlePageChange}
         />
+
         <Dialog open={showDialog} onOpenChange={setShowDialog}>
           <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
             <DialogHeader>
@@ -288,6 +341,7 @@ export default function ProgramPage() {
             <ProgramForm onSubmit={handleSubmit} onCancel={handleCancel} />
           </DialogContent>
         </Dialog>
+
         <ConfirmationDialog
           open={deleteConfirmation.isOpen}
           onOpenChange={(open) => !open && handleDeleteCancel()}
