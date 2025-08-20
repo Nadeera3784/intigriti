@@ -1,12 +1,11 @@
-# Intigriti 
+# Intigriti
 
 A Next.js application for managing bug bounty programs with sorting, pagination, and CRUD operations.
-
 
 ## Prerequisites
 
 - **Node.js** (22 or higher)
-- **npm** 
+- **npm**
 - **Docker** and **Docker Compose** (for database)
 - **Git**
 
@@ -36,6 +35,7 @@ docker-compose up -d
 ```
 
 This will start:
+
 - **PostgreSQL** on port `5332`
 - **pgAdmin** on port `5050` (admin@admin.com / admin)
 

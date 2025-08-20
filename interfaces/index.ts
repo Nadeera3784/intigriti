@@ -1,1 +1,1 @@
-export * from './program.interface';
+export * from "./program.interface";

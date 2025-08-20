@@ -1,4 +1,4 @@
-version: '3.8'
+version: "3.8"
 
 networks:
   intigriti-network:
@@ -10,7 +10,6 @@ volumes:
   pgadmin-data:
 
 services:
-
   postgres:
     container_name: postgres
     image: postgres:13
@@ -27,7 +26,7 @@ services:
       - intigriti-network
     restart: unless-stopped
     healthcheck:
-      test: [ "CMD-SHELL", "pg_isready -d postgres" ]
+      test: ["CMD-SHELL", "pg_isready -d postgres"]
       interval: 30s
       timeout: 10s
       retries: 5
@@ -38,7 +37,7 @@ services:
     environment:
       PGADMIN_DEFAULT_EMAIL: admin@admin.com
       PGADMIN_DEFAULT_PASSWORD: admin
-      PGADMIN_CONFIG_SERVER_MODE: 'False'
+      PGADMIN_CONFIG_SERVER_MODE: "False"
     volumes:
       - pgadmin-data:/var/lib/pgadmin
     ports:

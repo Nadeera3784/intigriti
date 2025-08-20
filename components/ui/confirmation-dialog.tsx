@@ -1,7 +1,7 @@
-"use client"
+"use client";
 
-import { memo } from "react"
-import { Button } from "./button"
+import { memo } from "react";
+import { Button } from "./button";
 import {
   Dialog,
   DialogContent,
@@ -9,20 +9,20 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from "./dialog"
-import { Loader } from "lucide-react"
+} from "./dialog";
+import { Loader } from "lucide-react";
 
 interface ConfirmationDialogProps {
-  open: boolean
-  onOpenChange: (open: boolean) => void
-  title: string
-  description: string
-  confirmText?: string
-  cancelText?: string
-  variant?: "default" | "destructive"
-  onConfirm: () => void
-  onCancel?: () => void
-  loading?: boolean
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  title: string;
+  description: string;
+  confirmText?: string;
+  cancelText?: string;
+  variant?: "default" | "destructive";
+  onConfirm: () => void;
+  onCancel?: () => void;
+  loading?: boolean;
 }
 
 function ConfirmationDialogComponent({
@@ -39,15 +39,15 @@ function ConfirmationDialogComponent({
 }: ConfirmationDialogProps) {
   const handleCancel = () => {
     if (onCancel) {
-      onCancel()
+      onCancel();
     } else {
-      onOpenChange(false)
+      onOpenChange(false);
     }
-  }
+  };
 
   const handleConfirm = () => {
-    onConfirm()
-  }
+    onConfirm();
+  };
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -60,7 +60,7 @@ function ConfirmationDialogComponent({
           <Button
             type="button"
             variant="ghost"
-            className="cursor-pointer" 
+            className="cursor-pointer"
             onClick={handleCancel}
             disabled={loading}
           >
@@ -71,7 +71,7 @@ function ConfirmationDialogComponent({
             variant={variant}
             onClick={handleConfirm}
             disabled={loading}
-            className="cursor-pointer" 
+            className="cursor-pointer"
           >
             {loading && <Loader className="animate-spin ml-2" />}
             {confirmText}
@@ -79,11 +79,8 @@ function ConfirmationDialogComponent({
         </DialogFooter>
       </DialogContent>
     </Dialog>
-  )
+  );
 }
 
-export const ConfirmationDialog = memo(ConfirmationDialogComponent)
-ConfirmationDialog.displayName = 'ConfirmationDialog'
-
-
-
+export const ConfirmationDialog = memo(ConfirmationDialogComponent);
+ConfirmationDialog.displayName = "ConfirmationDialog";

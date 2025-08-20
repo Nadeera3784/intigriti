@@ -1,33 +1,49 @@
-"use client"
+"use client";
 
-import { useState, useEffect } from "react"
-import { useForm } from "react-hook-form"
-import { zodResolver } from "@hookform/resolvers/zod"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Textarea } from "@/components/ui/textarea"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
-import { Calendar } from "@/components/ui/calendar"
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
-import { CalendarIcon, PlusIcon } from "lucide-react"
-import { format } from "date-fns"
-import { cn } from "@/lib/utils"
-import { CreateProgramFormSchema } from "@/schemas/forms"
-import { CreateProgramFormType, CreateProgramFormDataType } from "@/types"
-import { ASSET_TYPES } from "@/constants"
-import { fetchPrograms } from "@/lib/intercom"
-import { ApiProgram } from "@/interfaces"
-import EligibilityTable from "./eligibility-table"
+import { useState, useEffect } from "react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
+import { Calendar } from "@/components/ui/calendar";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { CalendarIcon, PlusIcon } from "lucide-react";
+import { format } from "date-fns";
+import { cn } from "@/lib/utils";
+import { CreateProgramFormSchema } from "@/schemas/forms";
+import { CreateProgramFormType, CreateProgramFormDataType } from "@/types";
+import { ASSET_TYPES } from "@/constants";
+import { fetchPrograms } from "@/lib/intercom";
+import { ApiProgram } from "@/interfaces";
+import EligibilityTable from "./eligibility-table";
 
 export function ProgramForm({ onSubmit, onCancel }: CreateProgramFormType) {
-
-  const [open, setOpen] = useState(false)
-  const [tempDate, setTempDate] = useState<Date | undefined>(undefined)
-  const [availablePrograms, setAvailablePrograms] = useState<ApiProgram[]>([])
-  const [selectedProgramId, setSelectedProgramId] = useState<string>("")
-  const [relatedPrograms, setRelatedPrograms] = useState<ApiProgram[]>([])
-  const [error, setError] = useState<string>("")
+  const [open, setOpen] = useState(false);
+  const [tempDate, setTempDate] = useState<Date | undefined>(undefined);
+  const [availablePrograms, setAvailablePrograms] = useState<ApiProgram[]>([]);
+  const [selectedProgramId, setSelectedProgramId] = useState<string>("");
+  const [relatedPrograms, setRelatedPrograms] = useState<ApiProgram[]>([]);
+  const [error, setError] = useState<string>("");
 
   const form = useForm<CreateProgramFormDataType>({
     resolver: zodResolver(CreateProgramFormSchema),
@@ -40,59 +56,68 @@ export function ProgramForm({ onSubmit, onCancel }: CreateProgramFormType) {
       identifier: "",
       description: "",
       relatedPrograms: undefined,
-    }
-  })
-
+    },
+  });
 
   useEffect(() => {
     const loadPrograms = async () => {
       try {
-        const response = await fetchPrograms()
-        setAvailablePrograms(response.programs)
+        const response = await fetchPrograms();
+        setAvailablePrograms(response.programs);
       } catch (error) {
-        console.error('Failed to load programs:', error)
+        console.error("Failed to load programs:", error);
       }
-    }
-    loadPrograms()
-  }, [])
+    };
+    loadPrograms();
+  }, []);
 
   const handleAddRelatedProgram = () => {
-    setError("")
-    
+    setError("");
+
     if (!selectedProgramId) {
-      setError("Please select a program")
-      return
+      setError("Please select a program");
+      return;
     }
 
-    const selectedProgram = availablePrograms.find(p => p.id === selectedProgramId)
+    const selectedProgram = availablePrograms.find(
+      (p) => p.id === selectedProgramId,
+    );
     if (!selectedProgram) {
-      setError("Selected program not found")
-      return
+      setError("Selected program not found");
+      return;
     }
 
-    if (relatedPrograms.some(p => p.id === selectedProgramId)) {
-      setError("This program is already added")
-      return
+    if (relatedPrograms.some((p) => p.id === selectedProgramId)) {
+      setError("This program is already added");
+      return;
     }
 
-    const newRelatedPrograms = [...relatedPrograms, selectedProgram]
-    setRelatedPrograms(newRelatedPrograms)
-    
-    form.setValue('relatedPrograms', newRelatedPrograms.map(p => p.id))
-    
-    setSelectedProgramId("")
-  }
+    const newRelatedPrograms = [...relatedPrograms, selectedProgram];
+    setRelatedPrograms(newRelatedPrograms);
+
+    form.setValue(
+      "relatedPrograms",
+      newRelatedPrograms.map((p) => p.id),
+    );
+
+    setSelectedProgramId("");
+  };
 
   const handleRemoveRelatedProgram = (programId: string) => {
-    const newRelatedPrograms = relatedPrograms.filter(p => p.id !== programId)
-    setRelatedPrograms(newRelatedPrograms)
-    
-    form.setValue('relatedPrograms', newRelatedPrograms.map(p => p.id))
-  }
+    const newRelatedPrograms = relatedPrograms.filter(
+      (p) => p.id !== programId,
+    );
+    setRelatedPrograms(newRelatedPrograms);
+
+    form.setValue(
+      "relatedPrograms",
+      newRelatedPrograms.map((p) => p.id),
+    );
+  };
 
   const handleSubmit = (data: CreateProgramFormDataType) => {
-    onSubmit(data)
-  }
+    onSubmit(data);
+  };
 
   return (
     <div className="space-y-6">
@@ -126,7 +151,7 @@ export function ProgramForm({ onSubmit, onCancel }: CreateProgramFormType) {
                             variant="outline"
                             className={cn(
                               "w-full pl-3 text-left font-normal",
-                              !field.value && "text-muted-foreground"
+                              !field.value && "text-muted-foreground",
                             )}
                           >
                             {field.value ? (
@@ -144,26 +169,26 @@ export function ProgramForm({ onSubmit, onCancel }: CreateProgramFormType) {
                           selected={tempDate}
                           onSelect={setTempDate}
                           disabled={(date) => {
-                            const today = new Date()
-                            today.setHours(0, 0, 0, 0)
-                            return date < today
+                            const today = new Date();
+                            today.setHours(0, 0, 0, 0);
+                            return date < today;
                           }}
                           onCancel={() => {
-                            setTempDate(field.value)
-                            setOpen(false)
+                            setTempDate(field.value);
+                            setOpen(false);
                           }}
                           onConfirm={() => {
                             if (tempDate) {
-                              field.onChange(tempDate)
+                              field.onChange(tempDate);
                             }
-                            setOpen(false)
+                            setOpen(false);
                           }}
                         />
                       </PopoverContent>
                     </Popover>
                     <FormMessage />
                   </FormItem>
-                )
+                );
               }}
             />
             <FormField
@@ -199,7 +224,10 @@ export function ProgramForm({ onSubmit, onCancel }: CreateProgramFormType) {
             render={({ field }) => (
               <FormItem className="w-full">
                 <FormLabel>Asset You Want to Test</FormLabel>
-                <Select onValueChange={field.onChange} defaultValue={field.value ?? undefined}>
+                <Select
+                  onValueChange={field.onChange}
+                  defaultValue={field.value ?? undefined}
+                >
                   <FormControl>
                     <SelectTrigger className="w-full">
                       <SelectValue placeholder="Please select" />
@@ -207,7 +235,11 @@ export function ProgramForm({ onSubmit, onCancel }: CreateProgramFormType) {
                   </FormControl>
                   <SelectContent className="max-h-64">
                     {ASSET_TYPES.map(({ value, label, icon: Icon }) => (
-                      <SelectItem key={value} value={value} className="cursor-pointer">
+                      <SelectItem
+                        key={value}
+                        value={value}
+                        className="cursor-pointer"
+                      >
                         <div className="flex items-center gap-2">
                           <Icon className="h-4 w-4" />
                           <span>{label}</span>
@@ -240,10 +272,10 @@ export function ProgramForm({ onSubmit, onCancel }: CreateProgramFormType) {
               <FormItem>
                 <FormLabel>Description</FormLabel>
                 <FormControl>
-                  <Textarea 
-                    placeholder="Description..." 
+                  <Textarea
+                    placeholder="Description..."
                     className="min-h-16"
-                    {...field} 
+                    {...field}
                   />
                 </FormControl>
                 <FormMessage />
@@ -254,21 +286,30 @@ export function ProgramForm({ onSubmit, onCancel }: CreateProgramFormType) {
             <div>
               <FormLabel>Bounty Eligibility</FormLabel>
               <div className="flex gap-2 mt-2">
-                <Select value={selectedProgramId} onValueChange={setSelectedProgramId}>
+                <Select
+                  value={selectedProgramId}
+                  onValueChange={setSelectedProgramId}
+                >
                   <SelectTrigger className="flex-1">
                     <SelectValue placeholder="Please Select" />
                   </SelectTrigger>
                   <SelectContent className="max-h-64">
                     {availablePrograms.map((program) => (
-                      <SelectItem key={program.id} value={program.id} className="cursor-pointer">
+                      <SelectItem
+                        key={program.id}
+                        value={program.id}
+                        className="cursor-pointer"
+                      >
                         <div className="flex items-center gap-2">
-                          <span className={cn(
-                            "px-2 py-1 rounded-full text-xs font-medium",
-                            program.type === "web" 
-                              ? "bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300"
-                              : "bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300"
-                          )}>
-                            {program.type?.toUpperCase() || 'N/A'}
+                          <span
+                            className={cn(
+                              "px-2 py-1 rounded-full text-xs font-medium",
+                              program.type === "web"
+                                ? "bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300"
+                                : "bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300",
+                            )}
+                          >
+                            {program.type?.toUpperCase() || "N/A"}
                           </span>
                           <span>{program.name}</span>
                         </div>
@@ -276,8 +317,8 @@ export function ProgramForm({ onSubmit, onCancel }: CreateProgramFormType) {
                     ))}
                   </SelectContent>
                 </Select>
-                <Button 
-                  type="button" 
+                <Button
+                  type="button"
                   onClick={handleAddRelatedProgram}
                   className="px-6 cursor-pointer"
                 >
@@ -290,15 +331,18 @@ export function ProgramForm({ onSubmit, onCancel }: CreateProgramFormType) {
               )}
             </div>
             {relatedPrograms.length > 0 && (
-              <EligibilityTable relatedPrograms={relatedPrograms} handleRemoveRelatedProgram={handleRemoveRelatedProgram}/>
+              <EligibilityTable
+                relatedPrograms={relatedPrograms}
+                handleRemoveRelatedProgram={handleRemoveRelatedProgram}
+              />
             )}
           </div>
           <div className="flex justify-between space-x-4">
-            <Button 
-              type="button" 
-              className="w-1/2 text-primary bg-primary/10 cursor-pointer" 
-              variant="secondary" 
-              size="lg" 
+            <Button
+              type="button"
+              className="w-1/2 text-primary bg-primary/10 cursor-pointer"
+              variant="secondary"
+              size="lg"
               onClick={onCancel}
             >
               Cancel
@@ -310,5 +354,5 @@ export function ProgramForm({ onSubmit, onCancel }: CreateProgramFormType) {
         </form>
       </Form>
     </div>
-  )
+  );
 }

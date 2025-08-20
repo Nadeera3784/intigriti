@@ -86,10 +86,7 @@
     "public.asset_type": {
       "name": "asset_type",
       "schema": "public",
-      "values": [
-        "web",
-        "mobile"
-      ]
+      "values": ["web", "mobile"]
     }
   },
   "schemas": {},
