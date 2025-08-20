@@ -4,9 +4,7 @@ A Next.js application for managing bug bounty programs with sorting, pagination,
 
 ## Prerequisites
 
-- **Node.js** (22 or higher)
-- **npm**
-- **Docker** and **Docker Compose** (for database)
+- **Docker** and **Docker Compose**
 - **Git**
 
 ## Local Setup
@@ -18,42 +16,24 @@ git clone <repository-url>
 cd intigriti
 ```
 
-### 2. Install Dependencies
-
-```bash
-npm install
-# or
-yarn install
-```
-
-### 3. Start the Database
+### Start the docker
 
 Start PostgreSQL and pgAdmin using Docker Compose:
 
 ```bash
-docker-compose up -d
+docker-compose up -d --build
 ```
 
 This will start:
 
 - **PostgreSQL** on port `5332`
+- **npm run dev** on port `3000`
 - **pgAdmin** on port `5050` (admin@admin.com / admin)
 
-### 4. Environment Setup
 
-Create a `.env.local` file in the root directory:
+### 2. Database Migration
 
-```env
-# Database
-DATABASE_URL="postgresql://psuser:pspassord@localhost:5332/psdtabase"
-
-# Next.js
-NEXT_PUBLIC_APP_URL="http://localhost:3000"
-```
-
-### 5. Database Migration
-
-Run the database migrations:
+Run the database migrations(run inside the docker container):
 
 ```bash
 npm run db:push
@@ -61,9 +41,9 @@ npm run db:push
 npx drizzle-kit push
 ```
 
-### 6. Seed Database (Optional)
+### 3. Seed Database (Optional)
 
-If you have a seed script:
+If you have a seed script(run inside the docker container):
 
 ```bash
 npm run db:seed
@@ -71,11 +51,5 @@ npm run db:seed
 node scripts/seed.ts
 ```
 
-### 7. Start the Development Server
-
-```bash
-npm run dev
-
-```
 
 The application will be available at `http://localhost:3000`
